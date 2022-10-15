@@ -19,3 +19,26 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             .catch(err => console.log(err));
     }
 });
+
+chrome.windows.getAll({ populate: true }, function (winData) {
+    for (var i in winData) {
+        var winTabs = winData[i].tabs;
+        var totTabs = winTabs.length;
+        for (var j = 0; j < totTabs; j++) {
+            // allTabs.push(winTabs[j]);
+            // console.log(winTabs[j]);
+            if (winTabs[j].url.includes("overdrive.com/media/")) {
+                console.log(winTabs[j])
+            }
+        }
+    }
+});
+
+
+function fetchMatchedTabs() {
+    allTabs.forEach(myTab => {
+        if (myTab.url.includes("overdrive.com/media/")) {
+            matchedTabs.push(myTab);
+        }
+    });
+}
