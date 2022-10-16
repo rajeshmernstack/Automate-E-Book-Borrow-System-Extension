@@ -50,7 +50,12 @@ function fetchMatchedTabs() {
     });
 }
 
-chrome.tabs.sendMessage(myTab, {some: 'abc'}, function(r) {
-    console.log(myTab)
-    console.log(r)
+// chrome.tabs.sendMessage(myTab, {some: 'abc'}, function(r) {
+//     console.log(myTab)
+//     console.log(r)
+//   });
+chrome.tabs.query({active: true, currentWindow: true},function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {greeting: "hello"}, function(response) {
+        console.log(response);
+    });
   });
