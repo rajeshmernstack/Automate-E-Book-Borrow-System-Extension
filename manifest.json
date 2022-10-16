@@ -1,39 +1,42 @@
 {
-    "name": "Borrow E-Book Automation",
-    "description": "This extension will help you to automate the borrow process of E-Book",
-    "version": "1.0.0",
-    "manifest_version": 3,
-    "icons": {
-        "16": "/images/icon.png",
-        "32": "/images/icon.png",
-        "48": "/images/icon.png",
-        "128": "/images/icon.png"
-    },
-    "background": {
-        "service_worker": "background.js"
-    },
-    "action": {
-        "default_popup": "popup.html",
-        "default_icon": {
-            "16": "/images/icon.png",
-            "32": "/images/icon.png",
-            "48": "/images/icon.png",
-            "128": "/images/icon.png"
-        }
-    },
-    "options_page": "options.html",
-    "permissions": [
-        "storage",
-        "activeTab",
-        "scripting",
-        "cookies",
-        "tabs",
-        "webNavigation",
-        "downloads",
-        "contextMenus"
-    ],
-    "host_permissions": [
-        "http://*/*",
-        "https://*/*"
-    ]
+  "name": "Borrow E-Book Automation",
+  "description": "This extension will help you to automate the borrow process of E-Book",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "/images/icon.png",
+    "32": "/images/icon.png",
+    "48": "/images/icon.png",
+    "128": "/images/icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "/images/icon.png",
+      "32": "/images/icon.png",
+      "48": "/images/icon.png",
+      "128": "/images/icon.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.overdrive.com/*"],
+      "js": ["content-script.js"]
+    }
+  ],
+  "options_page": "options.html",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "cookies",
+    "tabs",
+    "webNavigation",
+    "downloads",
+    "contextMenus"
+  ],
+  "host_permissions": ["http://*/*", "https://*/*"]
 }
