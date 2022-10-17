@@ -1,4 +1,5 @@
 
+function startTheAutomationTask() {
 
 
 var workingTabs = [];
@@ -20,7 +21,6 @@ chrome.windows.getAll({ populate: true }, function (winData) {
     }
 });
 var i = 0;
-
 var autoBorrow = setInterval(() => {
     if (i < workingTabs.length) {
 
@@ -86,23 +86,19 @@ var autoBorrow = setInterval(() => {
             chrome.windows.update(downloadTab.windowId, { focused: true }, (window) => {
                 chrome.tabs.update(downloadTab.id, { active: true })
             })
-        }, 6000)
+        }, 10000)
     }
 }, 15000)
 
-
+}
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.greeting === "GetURL") {
-        var tabURL = "Not set yet";
-        chrome.tabs.query({ active: true }, function (tabs) {
-            if (tabs.length === 0) {
-                sendResponse({});
-                return;
-            }
-            tabURL = tabs[0].url;
-            sendResponse({ navURL: tabURL });
-        });
+    console.log("Listed Messages")
+    if (request.task === "startAutomation") {
+        startTheAutomationTask();
+        sendResponse({ status: "Progress" });
+    }else if(request.task === "stopAutomation") {
+        sendResponse({status: "Stopped"})
     }
 });
 
