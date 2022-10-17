@@ -1,104 +1,88 @@
-
+var keepAliveInterval = null;
 function startTheAutomationTask() {
+    clearInterval(keepAliveInterval);
 
 
-var workingTabs = [];
-var downloadTab = {};
-console.log("I am background.js")
-chrome.windows.getAll({ populate: true }, function (winData) {
-    for (var i in winData) {
-        var winTabs = winData[i].tabs;
-        var totTabs = winTabs.length;
-        for (var j = 0; j < totTabs; j++) {
-            if (winTabs[j].url.includes("overdrive.com/media/")) {
-                console.log(winTabs[j])
-                workingTabs.push(winTabs[j]);
-            }
-            if (winTabs[j].url.includes("overdrive.com/account/loans")) {
-                downloadTab = winTabs[j]
+    var workingTabs = [];
+    var downloadTab = {};
+    chrome.windows.getAll({ populate: true }, function (winData) {
+        for (var i in winData) {
+            var winTabs = winData[i].tabs;
+            var totTabs = winTabs.length;
+            for (var j = 0; j < totTabs; j++) {
+                if (winTabs[j].url.includes("overdrive.com/media/")) {
+                    workingTabs.push(winTabs[j]);
+                }
+                if (winTabs[j].url.includes("overdrive.com/account/loans")) {
+                    downloadTab = winTabs[j]
+                }
             }
         }
-    }
-});
-var i = 0;
-var autoBorrow = setInterval(() => {
-    if (i < workingTabs.length) {
+    });
+    var i = 0;
+    var autoBorrow = setInterval(() => {
+        if (i < workingTabs.length) {
 
-        chrome.scripting.executeScript({
-            target: { tabId: workingTabs[i].id },
-            func: () => {
-                // write your code here
-                if (document.querySelector('.TitleActionButton.u-allCaps.button.radius.is-button.secondary.is-borrow.js-borrow.secondary') != null) {
-                    document.querySelector('.TitleActionButton.u-allCaps.button.radius.is-button.secondary.is-borrow.js-borrow.secondary').click();
-                    var borrowInner = setInterval(() => {
-
-                        if (document.querySelector('button.radius.secondary.contrast.u-allCaps.borrow-button') != null) {
-                            console.log("Borrow Button 2 Found")
-
-
-                            document.querySelector('button.radius.secondary.contrast.u-allCaps.borrow-button').click();
-                            clearInterval(borrowInner);
-                            setTimeout(() => {
-
-                                window.close();
-
-                            }, 4000)
-
-                        } else {
-                            console.log("Borrow Button 2 Not Found")
-                        }
-                    }, 5000)
-                    console.log("Brorrow Buttton 1 Found")
-                } else {
-                    console.log("Borrow Button 1 Not Found")
-                }
-            },
-        });
-
-        chrome.windows.update(workingTabs[i].windowId, { focused: true }, (window) => {
-            chrome.tabs.update(workingTabs[i].id, { active: true })
-            i++;
-        })
-    } else {
-        clearInterval(autoBorrow);
-        console.log("Borrowing Done")
-        console.log(downloadTab)
-        chrome.tabs.reload(downloadTab.id);
-        setTimeout(() => {
             chrome.scripting.executeScript({
-                target: { tabId: downloadTab.id },
+                target: { tabId: workingTabs[i].id },
                 func: () => {
-
-                    var downloadButtonCounter = 0;
-                    var allDownloadButtons = document.querySelectorAll('.loan-button-nonkindle.button.radius.primary.downloadButton')
-                    let downloadButtonInterval = setInterval(() => {
-                        if (downloadButtonCounter < allDownloadButtons.length) {
-                            allDownloadButtons[downloadButtonCounter].click();
-                            downloadButtonCounter++;
-                        } else {
-                            console.log("All Downloading Done")
-                            clearInterval(downloadButtonInterval);
-                        }
-                    }, 5000)
+                    if (document.querySelector('.TitleActionButton.u-allCaps.button.radius.is-button.secondary.is-borrow.js-borrow.secondary') != null) {
+                        document.querySelector('.TitleActionButton.u-allCaps.button.radius.is-button.secondary.is-borrow.js-borrow.secondary').click();
+                        var borrowInner = setInterval(() => {
+                            if (document.querySelector('button.radius.secondary.contrast.u-allCaps.borrow-button') != null) {
+                                document.querySelector('button.radius.secondary.contrast.u-allCaps.borrow-button').click();
+                                clearInterval(borrowInner);
+                                setTimeout(() => {
+                                    window.close();
+                                }, 4000)
+                            }
+                        }, 5000)
+                    }
                 },
             });
 
-            chrome.windows.update(downloadTab.windowId, { focused: true }, (window) => {
-                chrome.tabs.update(downloadTab.id, { active: true })
+            chrome.windows.update(workingTabs[i].windowId, { focused: true }, (window) => {
+                chrome.tabs.update(workingTabs[i].id, { active: true })
+                i++;
             })
-        }, 10000)
-    }
-}, 15000)
+        } else {
+            clearInterval(autoBorrow);
+            chrome.tabs.reload(downloadTab.id);
+            setTimeout(() => {
+                chrome.scripting.executeScript({
+                    target: { tabId: downloadTab.id },
+                    func: () => {
+
+                        var downloadButtonCounter = 0;
+                        var allDownloadButtons = document.querySelectorAll('.loan-button-nonkindle.button.radius.primary.downloadButton')
+                        let downloadButtonInterval = setInterval(() => {
+                            if (downloadButtonCounter < allDownloadButtons.length) {
+                                allDownloadButtons[downloadButtonCounter].click();
+                                downloadButtonCounter++;
+                            } else {
+                                clearInterval(downloadButtonInterval);
+                            }
+                        }, 5000)
+                    },
+                });
+
+                chrome.windows.update(downloadTab.windowId, { focused: true }, (window) => {
+                    chrome.tabs.update(downloadTab.id, { active: true })
+                })
+            }, 10000)
+        }
+    }, 15000)
 
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log("Listed Messages")
     if (request.task === "startAutomation") {
-        startTheAutomationTask();
+
+        keepAliveInterval = setInterval(startTheAutomationTask, 5000)
+
         sendResponse({ status: "Progress" });
-    }else if(request.task === "stopAutomation") {
-        sendResponse({status: "Stopped"})
+    } else if (request.task === "stopAutomation") {
+        sendResponse({ status: "Stopped" })
     }
 });
 
