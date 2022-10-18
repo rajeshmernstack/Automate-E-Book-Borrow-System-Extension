@@ -32,11 +32,12 @@
     "storage",
     "activeTab",
     "scripting",
-    "cookies",
     "tabs",
     "webNavigation",
     "downloads",
-    "contextMenus"
+    "contextMenus",
+    "background",
+    "alarms"
   ],
   "host_permissions": ["http://*/*", "https://*/*"]
 }
